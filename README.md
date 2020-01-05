@@ -1,4 +1,4 @@
-# Unofficial Asana Chrome Extension
+# Unofficial Asana Chrome Extension for OCB LAB LTD.
 
 This is a free, open-source, unofficial Chrome extension to allow quick and easy access 
 to Asana. This extension uses Asana API to communicate with Asana.
@@ -39,13 +39,13 @@ Asana offers rich set of REST API. Onus is on us to develop something great out 
 ## Usage
 ### Install as a User:
 Head to [Chrome Web Store](https://chrome.google.com/webstore/detail/asanang-asana-extension-f/mcfgjehdbegcfjeecdgdpjlmfbeamgdd) and click "+ADD TO CHROME"
-
+<!-- 
 ### Install as a developer:
   1. Download the code, e.g. `git clone git@github.com:amitg87/asana-chrome-plugin.git`
   2. Navigate Chrome to `chrome://extensions`
   3. Check the `Developer mode` toggle
   4. Click on `Load unpacked extension...`
-  5. Select the folder containing the extension
+  5. Select the folder containing the extension -->
 
 ## User Guide
 Long Way - Look for Asana in Chrome Browser Action (top-right corner),

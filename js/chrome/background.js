@@ -1,6 +1,6 @@
 asanaModule.run(['AsanaConstants', 'AsanaGateway', "ChromeExtensionService", "$timeout", "$q", "StorageService",
 function (AsanaConstants, AsanaGateway, ChromeExtensionService, $timeout, $q, StorageService) {
-    chrome.browserAction.setBadgeText({text: "NG"});
+    chrome.browserAction.setBadgeText({text: "OC"});
     chrome.browserAction.setBadgeBackgroundColor({color: "#FC636B"});
 
     chrome.cookies.get({

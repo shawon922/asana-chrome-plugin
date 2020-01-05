@@ -44,18 +44,18 @@
                 <span class="text-gray font-size-10" data-ng-bind="userCtrl.user.email"></span>
             </div>
         </div>
-        <div class="col col-xs-2 padding-left-zero text-center">
+        <div class="col col-xs-2 padding-left-zero text-center hidden">
             <a href="https://github.com/amitg87/asana-chrome-plugin/wiki/AsanaNG-Wiki" target="_blank" title="Help">
                 <i class="fa fa-question-circle font-size-30"></i>
             </a>
         </div>
     </div>
     <ul class="nav nav-pills">
-        <li role="presentation" title="Create Task in Asana" data-ng-class="{ active: userCtrl.isActive('create')}">
-            <a href="create"><i class="fa fa-plus-circle"></i> Create</a>
-        </li>
         <li role="presentation" title="Manage Tasks" data-ng-class="{ active: userCtrl.isActive('manage')}">
             <a href="manage"><i class="fa fa-check-circle"></i> Manage</a>
+        </li>
+        <li role="presentation" title="Create Task in Asana" data-ng-class="{ active: userCtrl.isActive('create')}">
+            <a href="create"><i class="fa fa-plus-circle"></i> Create</a>
         </li>
         <li role="presentation" title="AsanaNG Settings" data-ng-class="{ active: userCtrl.isActive('settings')}">
             <a href="settings"><i class="fa fa-gear"></i> Settings</a>
