@@ -19,7 +19,7 @@
       "all_frames": true,
       "css": ["css/content.css"],
       "js": ["js/chrome/content.js"],
-      "matches": ["<all_urls>"],
+      "matches": ["https://app.asana.com/*"],
       "run_at": "document_end"
     }
   ],

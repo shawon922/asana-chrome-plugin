@@ -36,7 +36,7 @@ function (AsanaConstants, AsanaGateway, ChromeExtensionService, $timeout, $q, St
 
     function resetDefaultSuggestion() {
         chrome.omnibox.setDefaultSuggestion({
-            description: "AsanaNG: Search your Asana task/project/tag"
+            description: "AsanaOC: Search your Asana task/project/tag"
         });
     }
 

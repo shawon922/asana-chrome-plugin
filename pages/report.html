@@ -1,0 +1,76 @@
+<form class="task-manager">
+    <div class="form-group task-list">
+        <div style="margin: 5px;">
+            <h4 class="text-center">Selected task</h4>
+        </div>
+        <ul class="list-group">
+            <li class="list-group-item" data-ng-if='tasksCtrl.currentAsanaTask && tasksCtrl.isTask(tasksCtrl.currentAsanaTask.name) && tasksCtrl.isOwnTask(tasksCtrl.currentAsanaTask, userCtrl.user)'>
+                <div class="checkbox checkbox-info checkbox-circle checkbox-asana" data-ng-model="tasksCtrl.currentAsanaTask.gid">
+                    <input id="{{tasksCtrl.currentAsanaTask.gid}}" class="styled" type="checkbox" data-ng-checked="tasksCtrl.currentAsanaTask.completed"
+                        data-ng-click="tasksCtrl.currentAsanaTask.completed = !tasksCtrl.currentAsanaTask.completed; tasksCtrl.setCompleted(tasksCtrl.currentAsanaTask.gid, tasksCtrl.currentAsanaTask.completed);"
+                        title="{{tasksCtrl.currentAsanaTask.completed?'Mark Incomplete': 'Mark Complete'}}">
+                    <label for="{{tasksCtrl.currentAsanaTask.gid}}"></label>
+                    <a target="_blank" href="{{tasksCtrl.currentAsanaTaskUrl}}">
+                        <span class="task-name current-task-name" title="{{tasksCtrl.currentAsanaTask.name}}"
+                            data-ng-bind="tasksCtrl.currentAsanaTask.name"></span>
+                    </a>
+                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTaskGid)" ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">Start</button type="button">
+                    
+                    <button type="button" ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTaskGid, tasksCtrl.currentAsanaTask)" ng-click="tasksCtrl.endTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">End</button>
+                </div>
+            </li>
+            <li data-ng-if="!tasksCtrl.currentAsanaTask || !tasksCtrl.isTask(tasksCtrl.currentAsanaTask.name) || !tasksCtrl.isOwnTask(tasksCtrl.currentAsanaTask, userCtrl.user)">
+                <div class="text-center">No valid task found for this user.</div>
+            </li>
+        </ul>
+        <div style="margin-top: 5px;" class="form-group" data-ng-if="tasksCtrl.showProjectNameField">
+            <div class="input-group">
+                <input id="chatworkAccessToken" class="form-control" placeholder="Enter project name" type="text"
+                    data-ng-model="tasksCtrl.projectName" />
+                <span class="input-group-btn">
+                    <button ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)"
+                        class="btn btn-primary" type="button">Submit</button>
+                </span>
+            </div>
+        </div>
+        
+        <div style="margin: 5px;">
+            <h4 class="text-center">Task in progress</h4>
+        </div>
+        <div class="text-center"
+            data-ng-if="tasksCtrl.currentTaskStartTimeInterval && tasksCtrl.currentTaskStartTimeInterval !== ''">
+            {{ tasksCtrl.currentTaskStartTimeInterval | stopwatchFilter }}</div>
+        
+        <ul class="list-group">
+            <li class="list-group-item"
+                data-ng-if='tasksCtrl.inProgressTask && tasksCtrl.isTask(tasksCtrl.inProgressTask.name) && tasksCtrl.isOwnTask(tasksCtrl.inProgressTask, userCtrl.user)'>
+                <div class="checkbox checkbox-info checkbox-circle checkbox-asana"
+                    data-ng-model="tasksCtrl.inProgressTask.gid">
+                    <input id="{{tasksCtrl.inProgressTask.gid}}" class="styled" type="checkbox"
+                        data-ng-checked="tasksCtrl.inProgressTask.completed"
+                        data-ng-click="tasksCtrl.inProgressTask.completed = !tasksCtrl.inProgressTask.completed; tasksCtrl.setCompleted(tasksCtrl.inProgressTask.gid, tasksCtrl.inProgressTask.completed);"
+                        title="{{tasksCtrl.inProgressTask.completed?'Mark Incomplete': 'Mark Complete'}}">
+                    <label for="{{tasksCtrl.inProgressTask.gid}}"></label>
+                    <a target="_blank" href="{{tasksCtrl.inProgressTaskUrl}}">
+                        <span class="task-name current-task-name" title="{{tasksCtrl.inProgressTask.name}}"
+                            data-ng-bind="tasksCtrl.inProgressTask.name"></span>
+                    </a>
+                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTaskGid)"
+                        ng-click="tasksCtrl.startTask(tasksCtrl.inProgressTaskUrl, tasksCtrl.inProgressTask)"
+                        class="btn btn-default btn-sm">Start</button type="button">
+        
+                    <button type="button"
+                        ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTaskGid, tasksCtrl.inProgressTask)"
+                        ng-click="tasksCtrl.endTask(tasksCtrl.inProgressTaskUrl, tasksCtrl.inProgressTask)"
+                        class="btn btn-default btn-sm">End</button>
+                </div>
+            </li>
+            <li
+                data-ng-if="!tasksCtrl.inProgressTask || !tasksCtrl.isTask(tasksCtrl.inProgressTask.name) || !tasksCtrl.isOwnTask(tasksCtrl.inProgressTask, userCtrl.user)">
+                <div class="text-center">No task in progress for this user.</div>
+            </li>
+        </ul>
+        
+    </div>
+</form>
+

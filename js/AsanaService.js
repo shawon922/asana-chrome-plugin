@@ -321,3 +321,72 @@ asanaModule.service("ChromeExtensionService", [function () {
         });
     };
 }]);
+
+asanaModule.service("ChartworkGateway", ["$http", "AsanaConstants", "$q", "$filter",
+    function ($http, AsanaConstants, $q, $filter) {
+
+    var ChartworkGateway = this;
+
+    ChartworkGateway.sendMessageToRoom = function (options) {
+        options = options || {};
+        options.method = "POST";
+        options.path = "messages";
+        return ChartworkGateway.api(options);
+    };
+
+    //called by others
+    ChartworkGateway.api = function (options) {
+        options.headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+        };
+
+        // Be polite to API and tell them who we are.
+        var manifest = chrome.runtime.getManifest();
+        var client_name = [
+            "chrome-extension",
+            chrome.i18n.getMessage("@@extension_id"),
+            manifest.version,
+            manifest.name
+        ].join(":");
+
+        var asanaOptions = {};
+        if (options.method === "PUT" || options.method === "POST") {
+            asanaOptions = { client_name: client_name };
+        } else {
+            options.query = options.query || {};
+            options.query.opt_client_name = client_name;
+        }
+        var queryParams = "";
+        for (var key in options.query) {
+            if (options.query.hasOwnProperty(key)) {
+                queryParams += (key + "=" + options.query[key] + "&");
+            }
+        }
+        queryParams = encodeURI(queryParams.substr(0, queryParams.length - 1));
+
+        var url = AsanaConstants.getReporterBaseApiUrl() + options.path + "?" + queryParams;        
+        var dataParam = { data: options.data, options: asanaOptions }
+        var deferred = $q.defer();
+        $http({
+            method: options.method,
+            url: url,
+            respondType: 'json',
+            headers: options.headers || {},
+            data: dataParam
+        }).then(function (response) {
+            deferred.resolve(response.data.data);
+        }).catch(function (response) {
+            console.log("API Failure details: ");
+            console.log("URL: ", url);
+            console.log("Method: ", options.method);
+            console.log("Status Code: ", response.status);
+            console.log("Status Text: ", response.statusText)
+            console.log("Headers: ", options.headers);
+            console.log("Data: ", JSON.stringify(dataParam));
+            console.log("Response: ", JSON.stringify(response));
+            deferred.reject(response.data.errors);
+        });
+        return deferred.promise;
+    };
+}]);

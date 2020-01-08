@@ -3,6 +3,13 @@ var asanaModule = angular.module("asana", ["ngRoute", "ngSanitize", "ui.select",
 asanaModule.config(function($routeProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
     $routeProvider
+        .when("/report", {
+            // report page
+            templateUrl: "pages/report.html",
+            controller: "tasksController",
+            controllerAs: "tasksCtrl",
+            activeTab: "report"
+        })
         .when("/manage", {
             // task management page
             templateUrl : "pages/tasks.html",
@@ -25,11 +32,11 @@ asanaModule.config(function($routeProvider, $locationProvider) {
             activeTab   : "settings"
         })
         .when("popup.html", {
-            redirectTo  : "/manage"
+            redirectTo  : "/report"
         })
         .otherwise({
             //default
-            redirectTo  : "/manage"
+            redirectTo  : "/report"
         });
 });
 

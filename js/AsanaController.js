@@ -305,14 +305,158 @@ asanaModule.controller("createTaskController", ['$scope', 'AsanaGateway', '$time
     };
 }]);
 
-asanaModule.controller("tasksController", ["$scope", "AsanaGateway", "ChromeExtensionService", "$filter", "AsanaConstants", "$q", "StorageService",
-    function ($scope, AsanaGateway, ChromeExtension, $filter, AsanaConstants, $q, StorageService) {
+asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway", "ChartworkGateway", "ChromeExtensionService", "$filter", "AsanaConstants", "$q", "StorageService",
+  function ($scope, $interval, AsanaGateway, ChartworkGateway, ChromeExtension, $filter, AsanaConstants, $q, StorageService) {
     var tasksCtrl = this;
     tasksCtrl.selectedView = "My Tasks";
     tasksCtrl.filterTask = 'filterMyTasks';
     tasksCtrl.filterProject = {};
     tasksCtrl.filterTag = {};
     tasksCtrl.showTaskManager = true;
+
+    tasksCtrl.currentAsanaTaskId = null;
+    tasksCtrl.currentAsanaTask = null;
+    tasksCtrl.currentAsanaTaskUrl = null;
+    tasksCtrl.projectName = ''
+    tasksCtrl.showProjectNameField = false;
+    tasksCtrl.inProgressTaskUrl = AsanaConstants.getInProgressTaskUrl();
+    tasksCtrl.inProgressTask = AsanaConstants.getInProgressTask();
+    tasksCtrl.inProgressTaskGid = AsanaConstants.getInProgressTaskGid();
+
+    if (AsanaConstants.getCurrentTaskStartTime() && AsanaConstants.getCurrentTaskStartTime() !== '') {
+      tasksCtrl.currentTaskStartTimeInterval = new Date().getTime() - AsanaConstants.getCurrentTaskStartTime();
+    } else {
+      tasksCtrl.currentTaskStartTimeInterval = '';
+    }
+    
+    chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, function (tabs) {
+        url = tabs[0].url + '/f';
+        if (url && url !== '') {
+            url = url.trim();
+            url = url.replace('/f', '');
+
+            if (AsanaConstants.isValidAsanaTaskUrl(url)) {
+                tasksCtrl.currentAsanaTaskUrl = url;
+
+                let urlComponents = url.split('/');
+                let len = urlComponents.length;
+                if (len > 0) {
+                    tasksCtrl.currentAsanaTaskId = urlComponents[len - 1];
+                    let options  = {
+                        task_id: tasksCtrl.currentAsanaTaskId,
+                    };
+
+                    AsanaGateway.getTask(options).then(function (response) { 
+                       tasksCtrl.currentAsanaTask = response;
+                    });
+                }
+            }
+        }
+    });
+
+    tasksCtrl.timer = function() {
+      if (tasksCtrl.currentTaskStartTimeInterval !== '') {
+        return tasksCtrl.currentTaskStartTimeInterval++;
+      }
+    };
+
+    $interval(tasksCtrl.timer, 1000);
+    
+    tasksCtrl.isStartDisabled = function (inProgressTaskId) {      
+      return inProgressTaskId && inProgressTaskId !== '';
+    };
+
+    tasksCtrl.isEndDisabled = function (inProgressTaskId, task) {
+      return inProgressTaskId && inProgressTaskId !== task.gid;
+    };
+
+    tasksCtrl.isOwnTask = function(task, user) { 
+        if (!user || !task || !task.assignee) return false;
+
+        return task.assignee.gid === user.gid;
+    };
+
+    tasksCtrl.startTask = function(url, currentTask) { 
+      tasksCtrl.showProjectNameField = false;
+      if (tasksCtrl.inProgressTaskGid && tasksCtrl.inProgressTaskGid !== '') {
+        return;
+      }
+      let projectName = '';
+      if (currentTask && currentTask.projects && currentTask.projects.length > 0) {
+        projectName = currentTask.projects[0].name;
+      } else if (tasksCtrl.projectName && tasksCtrl.projectName !== '') {
+        projectName = tasksCtrl.projectName;
+      }
+
+      if (projectName === '') {
+        tasksCtrl.showProjectNameField = true;
+        return;
+      }
+
+      let options = {};
+
+      let msg = `[info]Start,${projectName.trim()},${url}[/info]`;
+      
+      options.data = {
+        body: msg,
+        chatwork_token: AsanaConstants.getChatworkAccessToken()
+      };
+      
+      ChartworkGateway.sendMessageToRoom(options);
+      let now = new Date().getTime();
+
+      tasksCtrl.inProgressTaskGid = currentTask.gid;
+      AsanaConstants.setCurrentTaskStartTime(now);
+      AsanaConstants.setInProgressTaskGid(currentTask.gid);
+      AsanaConstants.setInProgressTaskUrl(url);
+      AsanaConstants.setInProgressTask(currentTask);
+      AsanaConstants.setCurrentProjectName(projectName);
+      tasksCtrl.inProgressTask = currentTask;
+      tasksCtrl.inProgressTaskUrl = url;
+
+      tasksCtrl.currentTaskStartTimeInterval = 0;
+    };
+
+    tasksCtrl.endTask = function (url, currentTask) { 
+      tasksCtrl.showProjectNameField = false;
+      if (!tasksCtrl.inProgressTaskGid || tasksCtrl.inProgressTaskGid === '') {
+        return;
+      }
+
+      let projectName = '';
+      if (currentTask && currentTask.projects && currentTask.projects.length > 0) {
+        projectName = currentTask.projects[0].name;
+      } else if (AsanaConstants.getCurrentProjectName() && AsanaConstants.getCurrentProjectName() !== '') {
+        projectName = AsanaConstants.getCurrentProjectName();
+      }
+
+      if (projectName === '') {
+        tasksCtrl.showProjectNameField = true;
+        return;
+      }
+
+      let options = {};
+
+      let msg = `[info]End,${projectName.trim()},${url}[/info]`;
+
+      options.data = {
+        body: msg,
+        chatwork_token: AsanaConstants.getChatworkAccessToken()
+      };
+
+      ChartworkGateway.sendMessageToRoom(options);
+
+      tasksCtrl.inProgressTaskGid = '';
+      AsanaConstants.setCurrentTaskStartTime('');
+      AsanaConstants.setInProgressTaskGid('');
+      AsanaConstants.setInProgressTask('');
+      AsanaConstants.setInProgressTaskUrl('');
+      AsanaConstants.setCurrentProjectName('');
+      tasksCtrl.inProgressTask = '';
+      tasksCtrl.inProgressTaskUrl = '';
+
+      tasksCtrl.currentTaskStartTimeInterval = '';
+    };    
 
     AsanaGateway.getUserData().then(function (response) {
         tasksCtrl.user = response;
@@ -743,6 +887,11 @@ asanaModule.controller("settingsController", ['$scope', 'AsanaConstants', functi
     settingsCtrl.rememberFollower = AsanaConstants.getRememberFollower();
     settingsCtrl.changeRememberFollower = function () {
         AsanaConstants.setRememberFollower(settingsCtrl.rememberFollower);
+    };
+
+    settingsCtrl.chatworkAccessToken = AsanaConstants.getChatworkAccessToken();
+    settingsCtrl.changeChatworkAccessToken = function () {
+        AsanaConstants.setChatworkAccessToken(settingsCtrl.chatworkAccessToken);
     };
 
 }]);

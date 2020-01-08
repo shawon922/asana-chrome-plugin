@@ -352,6 +352,10 @@ span:focus{
     vertical-align: bottom;
 }
 
+.asana-ng-container .task-list .current-task-name {
+    max-width: calc(100% - 88px);
+}
+
 .asana-ng-container .task-list .task-details{
     color: #bbbbbb;
     cursor: pointer;
@@ -364,8 +368,8 @@ span:focus{
 .asana-ng-container .task-list {
     height: 256px;
     overflow-x: hidden;
-    overflow-y: scroll;
-    border: 1px solid rgba(0, 0, 0, 0.149);
+    overflow-y: auto;
+    /* border: 1px solid rgba(0, 0, 0, 0.149); */
     border-radius: 5px;
     margin-bottom: 0;
 }
