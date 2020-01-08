@@ -327,10 +327,24 @@ asanaModule.service("ChartworkGateway", ["$http", "AsanaConstants", "$q", "$filt
 
     var ChartworkGateway = this;
 
+    ChartworkGateway.getProfile = function (options) {
+        options = options || {};
+        options.method = "GET";
+        options.path = "profile";
+        return ChartworkGateway.api(options);
+    };
+
     ChartworkGateway.sendMessageToRoom = function (options) {
         options = options || {};
         options.method = "POST";
         options.path = "messages";
+        return ChartworkGateway.api(options);
+    };
+
+    ChartworkGateway.getTaskReport = function (options) {
+        options = options || {};
+        options.method = "GET";
+        options.path = "report";
         return ChartworkGateway.api(options);
     };
 
@@ -339,6 +353,7 @@ asanaModule.service("ChartworkGateway", ["$http", "AsanaConstants", "$q", "$filt
         options.headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Content-Type": "application/json",
+            "X-ChatWorkToken": AsanaConstants.getChatworkAccessToken(),
         };
 
         // Be polite to API and tell them who we are.
@@ -375,7 +390,7 @@ asanaModule.service("ChartworkGateway", ["$http", "AsanaConstants", "$q", "$filt
             headers: options.headers || {},
             data: dataParam
         }).then(function (response) {
-            deferred.resolve(response.data.data);
+            deferred.resolve(response.data);
         }).catch(function (response) {
             console.log("API Failure details: ");
             console.log("URL: ", url);

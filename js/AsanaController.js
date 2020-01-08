@@ -323,11 +323,36 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
     tasksCtrl.inProgressTask = AsanaConstants.getInProgressTask();
     tasksCtrl.inProgressTaskGid = AsanaConstants.getInProgressTaskGid();
 
+    tasksCtrl.chatworkProfile = null;
+
     if (AsanaConstants.getCurrentTaskStartTime() && AsanaConstants.getCurrentTaskStartTime() !== '') {
       tasksCtrl.currentTaskStartTimeInterval = new Date().getTime() - AsanaConstants.getCurrentTaskStartTime();
     } else {
       tasksCtrl.currentTaskStartTimeInterval = '';
     }
+
+    ChartworkGateway.getProfile().then(function (response) {
+      tasksCtrl.chatworkProfile = response;
+      let options = {
+        query: {
+          account_id: response.account_id,
+        },
+      };
+
+      ChartworkGateway.getTaskReport(options).then(function (reportResponse) {
+        let options = {
+          task_id: reportResponse.task_id,
+        };
+
+        console.log('reportResponse: ', reportResponse);
+        /* 
+        AsanaGateway.getTask(options).then(function (response) {
+          tasksCtrl.inProgressTask = response;
+          tasksCtrl.inProgressTaskUrl = response.task_url;
+          tasksCtrl.inProgressTaskGid = response.task_id;
+        }); */
+      });
+    });
     
     chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, function (tabs) {
         url = tabs[0].url + '/f';
