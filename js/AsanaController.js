@@ -319,9 +319,10 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
     tasksCtrl.currentAsanaTaskUrl = null;
     tasksCtrl.projectName = ''
     tasksCtrl.showProjectNameField = false;
-    tasksCtrl.inProgressTaskUrl = AsanaConstants.getInProgressTaskUrl();
-    tasksCtrl.inProgressTask = AsanaConstants.getInProgressTask();
-    tasksCtrl.inProgressTaskGid = AsanaConstants.getInProgressTaskGid();
+    // tasksCtrl.inProgressTaskUrl = AsanaConstants.getInProgressTaskUrl();
+    // tasksCtrl.inProgressTask = AsanaConstants.getInProgressTask();
+    // tasksCtrl.inProgressTaskGid = AsanaConstants.getInProgressTaskGid();
+    tasksCtrl.reportOfToday = [];
 
     tasksCtrl.chatworkProfile = null;
 
@@ -335,24 +336,39 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
       tasksCtrl.chatworkProfile = response;
       let options = {
         query: {
-          account_id: response.account_id,
+          account_id: tasksCtrl.chatworkProfile.account_id,
         },
       };
+      tasksCtrl.taskReportWrapper(options);
+    });
+
+    tasksCtrl.taskReportWrapper = function (options) { 
+      if (!options) return;     
 
       ChartworkGateway.getTaskReport(options).then(function (reportResponse) {
-        let options = {
-          task_id: reportResponse.task_id,
-        };
+        if (reportResponse) {
+          tasksCtrl.reportOfToday = [];
+          for (let item of reportResponse) {
+            let options = {
+              task_id: item.task_id,
+            };
 
-        console.log('reportResponse: ', reportResponse);
-        /* 
-        AsanaGateway.getTask(options).then(function (response) {
-          tasksCtrl.inProgressTask = response;
-          tasksCtrl.inProgressTaskUrl = response.task_url;
-          tasksCtrl.inProgressTaskGid = response.task_id;
-        }); */
+            AsanaGateway.getTask(options).then(function (response) {
+              let task = response;
+              task.url = item.task_url;
+              task.task_id = item.task_id;
+
+              if (item.task_status === 'start') {
+                tasksCtrl.inProgressTask = task;
+              } else {
+                tasksCtrl.reportOfToday.push(task);
+              }
+            });
+          }
+
+        }
       });
-    });
+    };
     
     chrome.tabs.query({ 'active': true, 'lastFocusedWindow': true }, function (tabs) {
         url = tabs[0].url + '/f';
@@ -387,7 +403,7 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
 
     $interval(tasksCtrl.timer, 1000);
     
-    tasksCtrl.isStartDisabled = function (inProgressTaskId) {      
+    tasksCtrl.isStartDisabled = function (inProgressTaskId) {
       return inProgressTaskId && inProgressTaskId !== '';
     };
 
@@ -430,21 +446,23 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
       ChartworkGateway.sendMessageToRoom(options);
       let now = new Date().getTime();
 
-      tasksCtrl.inProgressTaskGid = currentTask.gid;
+      currentTask.url = url;
+      currentTask.task_id = currentTask.gid;
+      // tasksCtrl.inProgressTaskGid = currentTask.gid;
       AsanaConstants.setCurrentTaskStartTime(now);
-      AsanaConstants.setInProgressTaskGid(currentTask.gid);
-      AsanaConstants.setInProgressTaskUrl(url);
+      // AsanaConstants.setInProgressTaskGid(currentTask.gid);
+      // AsanaConstants.setInProgressTaskUrl(url);
       AsanaConstants.setInProgressTask(currentTask);
       AsanaConstants.setCurrentProjectName(projectName);
       tasksCtrl.inProgressTask = currentTask;
-      tasksCtrl.inProgressTaskUrl = url;
+      // tasksCtrl.inProgressTaskUrl = url;
 
       tasksCtrl.currentTaskStartTimeInterval = 0;
     };
 
     tasksCtrl.endTask = function (url, currentTask) { 
       tasksCtrl.showProjectNameField = false;
-      if (!tasksCtrl.inProgressTaskGid || tasksCtrl.inProgressTaskGid === '') {
+      if (!tasksCtrl.inProgressTask.task_id || tasksCtrl.inProgressTask.task_id === '') {
         return;
       }
 
@@ -469,18 +487,22 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
         chatwork_token: AsanaConstants.getChatworkAccessToken()
       };
 
-      ChartworkGateway.sendMessageToRoom(options);
+      ChartworkGateway.sendMessageToRoom(options).then(function (response) { 
+        if (tasksCtrl.inProgressTask) {
+          tasksCtrl.reportOfToday.push(tasksCtrl.inProgressTask);
+        }
+        
+        // tasksCtrl.inProgressTaskGid = '';
+        AsanaConstants.setCurrentTaskStartTime('');
+        // AsanaConstants.setInProgressTaskGid('');
+        AsanaConstants.setInProgressTask('');
+        // AsanaConstants.setInProgressTaskUrl('');
+        AsanaConstants.setCurrentProjectName('');
+        tasksCtrl.inProgressTask = '';
+        // tasksCtrl.inProgressTaskUrl = '';
 
-      tasksCtrl.inProgressTaskGid = '';
-      AsanaConstants.setCurrentTaskStartTime('');
-      AsanaConstants.setInProgressTaskGid('');
-      AsanaConstants.setInProgressTask('');
-      AsanaConstants.setInProgressTaskUrl('');
-      AsanaConstants.setCurrentProjectName('');
-      tasksCtrl.inProgressTask = '';
-      tasksCtrl.inProgressTaskUrl = '';
-
-      tasksCtrl.currentTaskStartTimeInterval = '';
+        tasksCtrl.currentTaskStartTimeInterval = '';
+      });
     };    
 
     AsanaGateway.getUserData().then(function (response) {

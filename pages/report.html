@@ -1,7 +1,7 @@
 <form class="task-manager">
     <div class="form-group task-list">
         <div style="margin: 5px;">
-            <h4 class="text-center">Selected task</h4>
+            <h5 class="text-center"><strong>Selected task</strong></h5>
         </div>
         <ul class="list-group">
             <li class="list-group-item" data-ng-if='tasksCtrl.currentAsanaTask && tasksCtrl.isTask(tasksCtrl.currentAsanaTask.name) && tasksCtrl.isOwnTask(tasksCtrl.currentAsanaTask, userCtrl.user)'>
@@ -14,13 +14,13 @@
                         <span class="task-name current-task-name" title="{{tasksCtrl.currentAsanaTask.name}}"
                             data-ng-bind="tasksCtrl.currentAsanaTask.name"></span>
                     </a>
-                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTaskGid)" ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">Start</button type="button">
+                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)" ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">Start</button type="button">
                     
-                    <button type="button" ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTaskGid, tasksCtrl.currentAsanaTask)" ng-click="tasksCtrl.endTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">End</button>
+                    <button type="button" ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, tasksCtrl.currentAsanaTask)" ng-click="tasksCtrl.endTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">End</button>
                 </div>
             </li>
             <li data-ng-if="!tasksCtrl.currentAsanaTask || !tasksCtrl.isTask(tasksCtrl.currentAsanaTask.name) || !tasksCtrl.isOwnTask(tasksCtrl.currentAsanaTask, userCtrl.user)">
-                <div class="text-center">No valid task found for this user.</div>
+                <div class="text-center">No task selected for this user.</div>
             </li>
         </ul>
         <div style="margin-top: 5px;" class="form-group" data-ng-if="tasksCtrl.showProjectNameField">
@@ -35,7 +35,7 @@
         </div>
         
         <div style="margin: 5px;">
-            <h4 class="text-center">Task in progress</h4>
+            <h5 class="text-center"><strong>Task in progress</strong></h5>
         </div>
         <div class="text-center"
             data-ng-if="tasksCtrl.currentTaskStartTimeInterval && tasksCtrl.currentTaskStartTimeInterval !== ''">
@@ -51,23 +51,56 @@
                         data-ng-click="tasksCtrl.inProgressTask.completed = !tasksCtrl.inProgressTask.completed; tasksCtrl.setCompleted(tasksCtrl.inProgressTask.gid, tasksCtrl.inProgressTask.completed);"
                         title="{{tasksCtrl.inProgressTask.completed?'Mark Incomplete': 'Mark Complete'}}">
                     <label for="{{tasksCtrl.inProgressTask.gid}}"></label>
-                    <a target="_blank" href="{{tasksCtrl.inProgressTaskUrl}}">
+                    <a target="_blank" href="{{tasksCtrl.inProgressTask.url}}">
                         <span class="task-name current-task-name" title="{{tasksCtrl.inProgressTask.name}}"
                             data-ng-bind="tasksCtrl.inProgressTask.name"></span>
                     </a>
-                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTaskGid)"
-                        ng-click="tasksCtrl.startTask(tasksCtrl.inProgressTaskUrl, tasksCtrl.inProgressTask)"
+                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)"
+                        ng-click="tasksCtrl.startTask(tasksCtrl.inProgressTask.url, tasksCtrl.inProgressTask)"
                         class="btn btn-default btn-sm">Start</button type="button">
         
                     <button type="button"
-                        ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTaskGid, tasksCtrl.inProgressTask)"
-                        ng-click="tasksCtrl.endTask(tasksCtrl.inProgressTaskUrl, tasksCtrl.inProgressTask)"
+                        ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, tasksCtrl.inProgressTask)"
+                        ng-click="tasksCtrl.endTask(tasksCtrl.inProgressTask.url, tasksCtrl.inProgressTask)"
                         class="btn btn-default btn-sm">End</button>
                 </div>
             </li>
             <li
                 data-ng-if="!tasksCtrl.inProgressTask || !tasksCtrl.isTask(tasksCtrl.inProgressTask.name) || !tasksCtrl.isOwnTask(tasksCtrl.inProgressTask, userCtrl.user)">
                 <div class="text-center">No task in progress for this user.</div>
+            </li>
+        </ul>
+
+        <div style="margin: 5px;">
+            <h5 class="text-center"><strong>Today's report</strong></h5>
+        </div>
+        <ul class="list-group">
+            <li class="list-group-item" data-ng-repeat="todaysTask in tasksCtrl.reportOfToday"
+                data-ng-if='todaysTask && tasksCtrl.isTask(todaysTask.name) && tasksCtrl.isOwnTask(todaysTask, userCtrl.user)'>
+                <div class="checkbox checkbox-info checkbox-circle checkbox-asana"
+                    data-ng-model="todaysTask.gid">
+                    <input id="{{todaysTask.gid}}" class="styled" type="checkbox"
+                        data-ng-checked="todaysTask.completed"
+                        data-ng-click="todaysTask.completed = !todaysTask.completed; tasksCtrl.setCompleted(todaysTask.gid, todaysTask.completed);"
+                        title="{{todaysTask.completed?'Mark Incomplete': 'Mark Complete'}}">
+                    <label for="{{todaysTask.gid}}"></label>
+                    <a target="_blank" href="{{todaysTask.url}}">
+                        <span class="task-name current-task-name" title="{{todaysTask.name}}"
+                            data-ng-bind="todaysTask.name"></span>
+                    </a>
+                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)"
+                        ng-click="tasksCtrl.startTask(todaysTask.url, todaysTask)"
+                        class="btn btn-default btn-sm">Start</button type="button">
+        
+                    <button type="button"
+                        ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, todaysTask)"
+                        ng-click="tasksCtrl.endTask(todaysTask.url, todaysTask)"
+                        class="btn btn-default btn-sm">End</button>
+                </div>
+            </li>
+            <li
+                data-ng-if="!tasksCtrl.reportOfToday || tasksCtrl.reportOfToday.length === 0">
+                <div class="text-center">No report available for today.</div>
             </li>
         </ul>
         
