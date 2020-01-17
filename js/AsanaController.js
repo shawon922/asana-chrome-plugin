@@ -308,6 +308,8 @@ asanaModule.controller("createTaskController", ['$scope', 'AsanaGateway', '$time
 asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway", "ChartworkGateway", "ChromeExtensionService", "$filter", "AsanaConstants", "$q", "StorageService",
   function ($scope, $interval, AsanaGateway, ChartworkGateway, ChromeExtension, $filter, AsanaConstants, $q, StorageService) {
     var tasksCtrl = this;
+
+    tasksCtrl.chatworkAccessToken = AsanaConstants.getChatworkAccessToken();
     tasksCtrl.selectedView = "My Tasks";
     tasksCtrl.filterTask = 'filterMyTasks';
     tasksCtrl.filterProject = {};
@@ -327,7 +329,10 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
     tasksCtrl.chatworkProfile = null;
 
     if (AsanaConstants.getCurrentTaskStartTime() && AsanaConstants.getCurrentTaskStartTime() !== '') {
-      tasksCtrl.currentTaskStartTimeInterval = new Date().getTime() - AsanaConstants.getCurrentTaskStartTime();
+      // console.log("AsanaConstants.getCurrentTaskStartTime(): ", new Date(Math.floor(AsanaConstants.getCurrentTaskStartTime())));
+      // console.log("new Date().getTime(): ", new Date(new Date().getTime()));
+      let interval = new Date().getTime() - Math.floor(AsanaConstants.getCurrentTaskStartTime());
+      tasksCtrl.currentTaskStartTimeInterval = Math.floor(interval / 1000);
     } else {
       tasksCtrl.currentTaskStartTimeInterval = '';
     }
@@ -360,6 +365,8 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
 
               if (item.task_status === 'start') {
                 tasksCtrl.inProgressTask = task;
+                let interval = new Date().getTime() / 1000 - item.start_time;
+                tasksCtrl.currentTaskStartTimeInterval = Math.floor(interval);
               } else {
                 tasksCtrl.reportOfToday.push(task);
               }
@@ -448,6 +455,7 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
 
       currentTask.url = url;
       currentTask.task_id = currentTask.gid;
+      currentTask.project_name = projectName;
       // tasksCtrl.inProgressTaskGid = currentTask.gid;
       AsanaConstants.setCurrentTaskStartTime(now);
       // AsanaConstants.setInProgressTaskGid(currentTask.gid);
@@ -471,6 +479,8 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
         projectName = currentTask.projects[0].name;
       } else if (AsanaConstants.getCurrentProjectName() && AsanaConstants.getCurrentProjectName() !== '') {
         projectName = AsanaConstants.getCurrentProjectName();
+      } else if (tasksCtrl.inProgressTask.project_name && tasksCtrl.inProgressTask.project_name !== '') {
+          projectName = tasksCtrl.inProgressTask.project_name;
       }
 
       if (projectName === '') {
@@ -498,6 +508,7 @@ asanaModule.controller("tasksController", ["$scope", "$interval", "AsanaGateway"
         AsanaConstants.setInProgressTask('');
         // AsanaConstants.setInProgressTaskUrl('');
         AsanaConstants.setCurrentProjectName('');
+        tasksCtrl.projectName = '';
         tasksCtrl.inProgressTask = '';
         // tasksCtrl.inProgressTaskUrl = '';
 

@@ -1,5 +1,5 @@
-<form class="task-manager">
-    <div class="form-group task-list">
+<div class="task-manager">
+    <div data-ng-if="tasksCtrl.chatworkAccessToken && tasksCtrl.chatworkAccessToken !== ''" class="form-group task-list">
         <div style="margin: 5px;">
             <h5 class="text-center"><strong>Selected task</strong></h5>
         </div>
@@ -14,9 +14,9 @@
                         <span class="task-name current-task-name" title="{{tasksCtrl.currentAsanaTask.name}}"
                             data-ng-bind="tasksCtrl.currentAsanaTask.name"></span>
                     </a>
-                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)" ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">Start</button type="button">
+                    <button data-ng-if="!tasksCtrl.currentAsanaTask.completed" type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)" ng-click="tasksCtrl.startTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">Start</button type="button">
                     
-                    <button type="button" ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, tasksCtrl.currentAsanaTask)" ng-click="tasksCtrl.endTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">End</button>
+                    <button data-ng-if="!tasksCtrl.currentAsanaTask.completed" type="button" ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, tasksCtrl.currentAsanaTask)" ng-click="tasksCtrl.endTask(tasksCtrl.currentAsanaTaskUrl, tasksCtrl.currentAsanaTask)" class="btn btn-default btn-sm">End</button>
                 </div>
             </li>
             <li data-ng-if="!tasksCtrl.currentAsanaTask || !tasksCtrl.isTask(tasksCtrl.currentAsanaTask.name) || !tasksCtrl.isOwnTask(tasksCtrl.currentAsanaTask, userCtrl.user)">
@@ -88,11 +88,11 @@
                         <span class="task-name current-task-name" title="{{todaysTask.name}}"
                             data-ng-bind="todaysTask.name"></span>
                     </a>
-                    <button type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)"
+                    <button data-ng-if="!todaysTask.completed" type="button" ng-disabled="tasksCtrl.isStartDisabled(tasksCtrl.inProgressTask.task_id)"
                         ng-click="tasksCtrl.startTask(todaysTask.url, todaysTask)"
                         class="btn btn-default btn-sm">Start</button type="button">
         
-                    <button type="button"
+                    <button data-ng-if="!todaysTask.completed" type="button"
                         ng-disabled="tasksCtrl.isEndDisabled(tasksCtrl.inProgressTask.task_id, todaysTask)"
                         ng-click="tasksCtrl.endTask(todaysTask.url, todaysTask)"
                         class="btn btn-default btn-sm">End</button>
@@ -102,8 +102,10 @@
                 data-ng-if="!tasksCtrl.reportOfToday || tasksCtrl.reportOfToday.length === 0">
                 <div class="text-center">No report available for today.</div>
             </li>
-        </ul>
-        
+        </ul>        
     </div>
-</form>
+    <div data-ng-if="!tasksCtrl.chatworkAccessToken || tasksCtrl.chatworkAccessToken === ''">
+        <h3 class="text-center">Please add your chatwork access token first.</h3>
+    </div>
+</div>
 

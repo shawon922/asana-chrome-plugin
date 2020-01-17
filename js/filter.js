@@ -36,6 +36,7 @@ asanaModule.filter("nameInitials", function () {
     };
 }).filter("stopwatchFilter", function () {
     return function (number) {
+
         var seconds = 0;
         var minutes = 0;
         var hours = 0;

@@ -11,8 +11,8 @@ asanaModule.value("AsanaConstants", (function () {
         },
 
         getReporterBaseApiUrl: function () {
-            return "http://localhost/task-reporter/public/api/v1/";
-            // return "https://" + this.REPORTER_API_HOST + '/task-reporter/public/api/v1' + "/";
+            // return "http://localhost/task-reporter/public/api/v1/";
+            return "https://" + this.REPORTER_API_HOST + '/task-reporter/public/api/v1' + "/";
         },
 
         getBaseApiUrl: function () {
